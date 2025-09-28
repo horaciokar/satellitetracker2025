@@ -93,16 +93,16 @@ app.get('/api/satellite-passes', async (req, res) => {
     }
 
     const observerGd = {
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lon),
+        latitude: parseFloat(lat) * (Math.PI / 180),
+        longitude: parseFloat(lon) * (Math.PI / 180),
         height: 0,
     };
 
     try {
         const allTles = [
             ...(await getTles('iss')),
-            ...(await getTles('noaa')),
-            ...(await getTles('starlink')),
+            // ...(await getTles('noaa')),
+            // ...(await getTles('starlink')),
         ];
 
         const passes = [];
@@ -112,17 +112,32 @@ app.get('/api/satellite-passes', async (req, res) => {
 
         for (const tle of allTles) {
             const satrec = satellite.twoline2satrec(tle.line1, tle.line2);
+            if (satrec.error) {
+                continue; // Skip invalid TLEs
+            }
+
+            // Qualification check: if it fails to propagate now, it will likely fail for all steps.
+            const initialPropagation = satellite.propagate(satrec, now);
+            if (!initialPropagation || !initialPropagation.position) {
+                continue;
+            }
+
             let inPass = false;
             let currentPass = null;
 
             for (let i = 0; i < tenDays; i += timeStep) {
                 const time = new Date(now.getTime() + i);
                 const positionAndVelocity = satellite.propagate(satrec, time);
+
+                if (!positionAndVelocity || !positionAndVelocity.position) {
+                    continue; // Skip this timestep if propagation fails
+                }
+
                 const positionEci = positionAndVelocity.position;
                 const gmst = satellite.gstime(time);
                 const lookAngles = satellite.ecfToLookAngles(observerGd, satellite.eciToEcf(positionEci, gmst));
 
-                const elevation = satellite.degrees(lookAngles.elevation);
+                const elevation = lookAngles.elevation * (180 / Math.PI);
 
                 if (elevation > 10) { // Consideramos visible por encima de 10 grados
                     if (!inPass) {
@@ -131,14 +146,14 @@ app.get('/api/satellite-passes', async (req, res) => {
                             satelliteName: tle.name,
                             startTime: time,
                             maxElevation: elevation,
-                            maxElevationAzimuth: satellite.degrees(lookAngles.azimuth),
+                            maxElevationAzimuth: lookAngles.azimuth * (180 / Math.PI),
                             maxElevationTime: time,
                         };
                     }
 
                     if (elevation > currentPass.maxElevation) {
                         currentPass.maxElevation = elevation;
-                        currentPass.maxElevationAzimuth = satellite.degrees(lookAngles.azimuth);
+                        currentPass.maxElevationAzimuth = lookAngles.azimuth * (180 / Math.PI);
                         currentPass.maxElevationTime = time;
                     }
                 } else {
