@@ -1,0 +1,80 @@
+/* Estilos base inspirados en la NASA */
+body {
+    background-color: #0a0a1a; /* Azul muy oscuro, casi negro */
+    color: #f0f0f0; /* Un blanco no tan puro */
+    font-family: 'Roboto Mono', monospace, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #0B3D91; /* Azul NASA */
+    border-bottom: 2px solid #0B3D91;
+    padding-bottom: 10px;
+}
+
+#map {
+    height: 400px;
+    width: 100%;
+    border: 1px solid #0B3D91;
+    margin-top: 20px;
+}
+
+.dashboard {
+    margin-top: 40px;
+}
+
+.dashboard h2 {
+    color: #0B3D91;
+}
+
+#location-form {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+#location-form label {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+#location-form input {
+    background-color: #1c1c2c;
+    border: 1px solid #0B3D91;
+    color: #f0f0f0;
+    padding: 8px;
+    font-family: inherit;
+}
+
+#location-form button {
+    background-color: #0B3D91;
+    color: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    align-self: flex-end;
+}
+
+#passes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#passes-table th, #passes-table td {
+    border: 1px solid #0B3D91;
+    padding: 10px;
+    text-align: left;
+}
+
+#passes-table th {
+    background-color: #1c1c2c;
+}

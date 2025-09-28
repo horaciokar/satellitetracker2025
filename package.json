@@ -1,0 +1,18 @@
+{
+  "name": "satellitetracker2025",
+  "version": "1.0.0",
+  "description": "Una aplicación web para visualizar la posición en tiempo real de la Estación Espacial Internacional (ISS) y obtener un dashboard con los próximos pasos visibles de satélites (ISS, NOAA, Starlink) para una ubicación específica.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "express": "^5.1.0",
+    "satellite.js": "^6.0.1"
+  }
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Tracker 2025</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Satellite Tracker 2025</h1>
+    <div id="map"></div>
+
+    <div class="dashboard">
+        <h2>Dashboard de Pasos de Satélites (Próximos 10 días)</h2>
+        <form id="location-form">
+            <div class="form-group">
+                <label for="latitude">Tu Latitud:</label>
+                <input type="number" id="latitude" name="latitude" step="any" required placeholder="Ej: 40.7128">
+            </div>
+            <div class="form-group">
+                <label for="longitude">Tu Longitud:</label>
+                <input type="number" id="longitude" name="longitude" step="any" required placeholder="Ej: -74.0060">
+            </div>
+            <button type="submit">Buscar Pasos</button>
+        </form>
+
+        <div id="passes-result">
+            <p>Introduce tus coordenadas para ver los próximos pasos de satélites.</p>
+            <table id="passes-table">
+                <thead>
+                    <tr>
+                        <th>Satélite</th>
+                        <th>Hora de Inicio</th>
+                        <th>Elevación Máx.</th>
+                        <th>Hora de Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Las filas de datos se insertarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="client.js"></script>
+</body>
+</html>
