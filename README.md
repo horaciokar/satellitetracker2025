@@ -1,5 +1,9 @@
 # Satellite Tracker 2025
 
+**Repositorio en GitHub:** [https://github.com/horaciokar/satellitetracker2025](https://github.com/horaciokar/satellitetracker2025)
+
+---
+
 Una aplicación web para visualizar la posición en tiempo real de la Estación Espacial Internacional (ISS) y obtener un dashboard con los próximos pasos visibles de satélites (ISS, NOAA, Starlink) para una ubicación específica.
 
 El diseño está inspirado en las interfaces de control de misión de la NASA.
