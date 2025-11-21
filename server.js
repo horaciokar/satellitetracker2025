@@ -120,7 +120,13 @@ app.get('/api/satellite-passes', async (req, res) => {
     };
 
     try {
-        const allTles = await getTles(group);
+        let allTles = await getTles(group);
+
+        // Limitar la cantidad de satélites Starlink para evitar sobrecarga
+        if (group === 'starlink' && allTles.length > 50) {
+            console.log(`INFO: Se encontraron ${allTles.length} satélites Starlink. Se procesarán solo los primeros 50 para mejorar el rendimiento.`);
+            allTles = allTles.slice(0, 50);
+        }
 
         const passes = [];
         const now = new Date();
