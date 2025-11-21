@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!group) return;
 
         try {
-            const response = await fetch(`/api/satellite-now?group=${group}`);
+            const cacheBust = `&_=${new Date().getTime()}`;
+            const response = await fetch(`/api/satellite-now?group=${group}${cacheBust}`);
             if (!response.ok) throw new Error(`Error en la petición: ${response.statusText}`);
             const data = await response.json();
             
@@ -88,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
         passesTableBody.innerHTML = '<tr><td colspan="4">Buscando pasos...</td></tr>';
 
         try {
-            const response = await fetch(`/api/satellite-passes?lat=${latitude}&lon=${longitude}&group=${satelliteGroup}`);
+            const cacheBust = `&_=${new Date().getTime()}`;
+            const response = await fetch(`/api/satellite-passes?lat=${latitude}&lon=${longitude}&group=${satelliteGroup}${cacheBust}`);
             if (!response.ok) throw new Error(`Error en el servidor: ${response.statusText}`);
             
             const passes = await response.json();
