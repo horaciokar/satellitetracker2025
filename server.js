@@ -87,9 +87,13 @@ app.get('/api/iss-now', async (req, res) => {
 });
 
 app.get('/api/satellite-passes', async (req, res) => {
-    const { lat, lon } = req.query;
+    const { lat, lon, group = 'iss' } = req.query; // Default to 'iss' if no group is provided
     if (!lat || !lon) {
         return res.status(400).json({ error: 'Latitud y longitud son requeridas' });
+    }
+
+    if (!TLE_URLS[group]) {
+        return res.status(400).json({ error: 'Grupo de satélites no válido' });
     }
 
     const observerGd = {
@@ -99,11 +103,7 @@ app.get('/api/satellite-passes', async (req, res) => {
     };
 
     try {
-        const allTles = [
-            ...(await getTles('iss')),
-            // ...(await getTles('noaa')),
-            // ...(await getTles('starlink')),
-        ];
+        const allTles = await getTles(group);
 
         const passes = [];
         const now = new Date();

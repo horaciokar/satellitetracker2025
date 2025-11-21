@@ -53,12 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const locationForm = document.getElementById('location-form');
     const passesTableBody = document.querySelector('#passes-table tbody');
+    const satelliteGroupInput = document.getElementById('satellite-group');
 
     locationForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const latitude = latitudeInput.value;
         const longitude = longitudeInput.value;
+        const satelliteGroup = satelliteGroupInput.value;
 
         if (!latitude || !longitude) {
             alert('Por favor, introduce una latitud y longitud válidas.');
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passesTableBody.innerHTML = '<tr><td colspan="4">Buscando pasos...</td></tr>';
 
         try {
-            const response = await fetch(`/api/satellite-passes?lat=${latitude}&lon=${longitude}`);
+            const response = await fetch(`/api/satellite-passes?lat=${latitude}&lon=${longitude}&group=${satelliteGroup}`);
             if (!response.ok) throw new Error(`Error en el servidor: ${response.statusText}`);
             
             const passes = await response.json();

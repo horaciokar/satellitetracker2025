@@ -26,6 +26,14 @@
                 <label for="longitude">Tu Longitud:</label>
                 <input type="number" id="longitude" name="longitude" step="any" required placeholder="Ej: -74.0060">
             </div>
+            <div class="form-group">
+                <label for="satellite-group">Grupo de Satélites:</label>
+                <select id="satellite-group" name="satellite-group">
+                    <option value="iss">Estación Espacial Internacional (ISS)</option>
+                    <option value="noaa">Satélites NOAA</option>
+                    <option value="starlink">Satélites Starlink</option>
+                </select>
+            </div>
             <button type="submit">Buscar Pasos</button>
         </form>
 
