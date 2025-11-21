@@ -9,19 +9,28 @@ const port = 3000;
 // --- CACHÉ DE TLEs ---
 const tleCache = {
     iss: { data: null, timestamp: null },
-    noaa: { data: null, timestamp: null },
+    'noaa-15': { data: null, timestamp: null },
+    'noaa-18': { data: null, timestamp: null },
+    'noaa-19': { data: null, timestamp: null },
     starlink: { data: null, timestamp: null },
 };
 const CACHE_DURATION_HOURS = 4;
 
 const TLE_URLS = {
     iss: 'https://celestrak.org/NORAD/elements/gp.php?NAME=ISS%20(ZARYA)&FORMAT=TLE',
-    noaa: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=TLE',
+    'noaa-15': 'https://celestrak.org/NORAD/elements/gp.php?NAME=NOAA%2015&FORMAT=TLE',
+    'noaa-18': 'https://celestrak.org/NORAD/elements/gp.php?NAME=NOAA%2018&FORMAT=TLE',
+    'noaa-19': 'https://celestrak.org/NORAD/elements/gp.php?NAME=NOAA%2019&FORMAT=TLE',
     starlink: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=TLE',
 };
 
 // Función para obtener TLEs (con caché)
 async function getTles(group) {
+    // Si el grupo es 'noaa', ya no es válido, pero lo mantenemos por si acaso
+    // para no romper nada, aunque no debería ser seleccionado en el frontend.
+    if (!tleCache[group]) { 
+        return [];
+    }
     const now = new Date();
     const cache = tleCache[group];
 
@@ -63,13 +72,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // --- ENDPOINTS DE LA API ---
 
-app.get('/api/iss-now', async (req, res) => {
+app.get('/api/satellite-now', async (req, res) => {
+    const { group = 'iss' } = req.query;
+
+    if (!TLE_URLS[group]) {
+        return res.status(400).json({ error: 'Grupo de satélites no válido' });
+    }
+
     try {
-        const issTles = await getTles('iss');
-        if (!issTles || issTles.length === 0) {
-            return res.status(500).json({ error: "No se pudo obtener el TLE de la ISS." });
+        const tles = await getTles(group);
+        if (!tles || tles.length === 0) {
+            return res.status(500).json({ error: `No se pudo obtener el TLE para el grupo ${group}.` });
         }
-        const satrec = satellite.twoline2satrec(issTles[0].line1, issTles[0].line2);
+        // Usar el primer TLE del grupo para la posición en tiempo real
+        const satrec = satellite.twoline2satrec(tles[0].line1, tles[0].line2);
         const now = new Date();
         const positionAndVelocity = satellite.propagate(satrec, now);
         const positionEci = positionAndVelocity.position;
@@ -77,12 +93,13 @@ app.get('/api/iss-now', async (req, res) => {
         const positionGd = satellite.eciToGeodetic(positionEci, gmst);
 
         res.json({
+            name: tles[0].name,
             latitude: satellite.degreesLat(positionGd.latitude),
             longitude: satellite.degreesLong(positionGd.longitude),
             altitude: positionGd.height,
         });
     } catch (error) {
-        res.status(500).json({ error: 'Error al calcular la posición de la ISS' });
+        res.status(500).json({ error: `Error al calcular la posición para el grupo ${group}` });
     }
 });
 

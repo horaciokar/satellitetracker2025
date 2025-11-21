@@ -13,16 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 latitudeInput.value = lat.toFixed(4);
                 longitudeInput.value = lon.toFixed(4);
                 console.log('Ubicación detectada y autocompletada.');
+                // Una vez que tenemos la ubicación, disparamos la búsqueda de pases
+                locationForm.requestSubmit();
             },
             (error) => {
                 console.warn(`No se pudo obtener la ubicación (${error.code}): ${error.message}. Por favor, introduce las coordenadas manualmente.`);
             }
         );
     } else {
-        console.warn('Geolocalización no está disponible en este navegador. Introduce las coordenadas manualmente.');
+        console.warn('Geolocalización no está disponible en este navegador. Introduce las coordenadas manually.');
     }
 
-    // --- LÓGICA DEL MAPA DE LA ISS ---
+    // --- LÓGICA DEL MAPA ---
 
     const map = L.map('map').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -30,25 +32,38 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    const issMarker = L.marker([0, 0]).addTo(map);
+    const satMarker = L.marker([0, 0]).addTo(map);
+    let mapUpdateInterval;
 
-    async function updateIssPosition() {
+    async function updateSatellitePosition() {
+        const group = document.getElementById('satellite-group').value;
+        if (!group) return;
+
         try {
-            const response = await fetch('/api/iss-now');
+            const response = await fetch(`/api/satellite-now?group=${group}`);
             if (!response.ok) throw new Error(`Error en la petición: ${response.statusText}`);
             const data = await response.json();
-            const { latitude, longitude } = data;
+            
+            const { name, latitude, longitude } = data;
             const newLatLng = new L.LatLng(latitude, longitude);
-            issMarker.setLatLng(newLatLng);
+            
+            satMarker.setLatLng(newLatLng).bindPopup(name).openPopup();
             map.panTo(newLatLng);
+
         } catch (error) {
-            console.error("No se pudo obtener la posición de la ISS:", error);
+            console.error(`No se pudo obtener la posición para ${group}:`, error);
         }
     }
 
-    updateIssPosition();
-    setInterval(updateIssPosition, 5000);
-
+    function startMapUpdates() {
+        // Limpiar intervalo anterior para evitar múltiples actualizaciones simultáneas
+        if (mapUpdateInterval) {
+            clearInterval(mapUpdateInterval);
+        }
+        updateSatellitePosition(); // Actualizar inmediatamente
+        mapUpdateInterval = setInterval(updateSatellitePosition, 5000);
+    }
+    
     // --- LÓGICA DEL DASHBOARD DE PASOS ---
 
     const locationForm = document.getElementById('location-form');
@@ -63,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const satelliteGroup = satelliteGroupInput.value;
 
         if (!latitude || !longitude) {
-            alert('Por favor, introduce una latitud y longitud válidas.');
+            // No mostrar alerta si el formulario se autocompleta, solo si el usuario pulsa el botón sin datos
+            if (event.submitter) { 
+                alert('Por favor, introduce una latitud y longitud válidas.');
+            }
             return;
         }
 
@@ -99,4 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
             passesTableBody.innerHTML = '<tr><td colspan="4" style="color: red;">Error al buscar los pasos. Inténtalo de nuevo.</td></tr>';
         }
     });
+
+    // Disparar la búsqueda y la actualización del mapa automáticamente
+    satelliteGroupInput.addEventListener('change', () => {
+        locationForm.requestSubmit();
+        startMapUpdates(); 
+    });
+
+    // Iniciar todo al cargar la página
+    startMapUpdates();
+
 });
